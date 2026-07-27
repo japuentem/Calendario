@@ -1,0 +1,35 @@
+(Transcrito por TurboScribe. Actualizar a Ilimitado para eliminar este mensaje.)
+
+¿Qué tal, Albert? Oye, qué rápido. Este, mira, te cuento rápido. La parte del administrador y del dueño de calendario, si tienen que entrar en un sistema de autenticación.
+
+Ese básicamente es el que tenemos, pero si la herramienta ya te hizo uno y es robusto, pues está perfecto. Ese es un punto. Luego, la parte del calendario, esa parte no tiene autenticación o no tiene.
+
+Eh? Te lo voy a plantear así. Puede o puede no tener autenticación. A qué me refiero? El calendario de usuarios de terceros.
+
+Ese es una página que se puede, se puede poner con usuario abierto y se puede colocar en el paso de un, por ejemplo, de una página, en el paso de un proceso donde se arranque en una página web. Por ejemplo, sabes que lo que se pone el calendario que este sí, regístrate para tu cita de este de asesoría. Le dan clic y entonces se abre el calendario.
+
+Al abrir el calendario ya empieza a gestionar su evento. Sale así funcionaría o este o se puede meter en un proceso. Sabes que llegas llegando a cierto punto.
+
+Sabes que aquí tenemos dudas de todo esto porque tus documentos están mal. Se agenda una cita y entonces ya se le pide a los asistentes, se pide a los asistentes que vayan. Y este es una cita, una videoconferencia, una llamada telefónica, lo que permite realmente la herramienta.
+
+Pero no es necesariamente que tenga un mecanismo de autenticación. Es como que está. Existe esa parte, pero puede ser abierto.
+
+Así funciona. Entonces el flujo normal es que una organización nos pide un calendario. En ese momento el administrador entra y da de alta a la organización, da de alta a los elementos, este los dueños de calendario que va a haber y ya hasta ahí sale.
+
+Y bueno, por supuesto, da de alta a sus calendarios. Sí, para que estén activos. Y después de eso, pues ya les les este, les suelta el usuario y la contraseña a los dueños de calendarios o a la organización para que ya lo distribuya.
+
+Y después de eso, pues los dueños de calendario tienen que entrar a la página del dominio de calendarios y hacer sus configuraciones, poner sus horarios, ajustar sus estos son los eventos que van a aceptar, ajustar los tiempos de acuerdo a lo que ellos consideran. Y en ese momento, pues ya está el calendario está activo. Y este pues se le suelta la al mecanismo para que ellos o las páginas para que puedan acceder.
+
+Entonces no se suelta la página para que sea pública o que o si hay mecanismo de autenticación, pues ellos lo deberían de proveer. Básicamente eso así funcionaría. Y este no es que en una en un mismo bueno, si es un mismo sistema, pero para que me entiendas, tiene dos partes que son privadas, que son el administrador, que es súper privado y el dueño de calendario, que es privado, pero se le suelta un usuario un paso para que ellos puedan acceder.
+
+Yo sugeriría que tuviéramos nuestro mes y usáramos el mecanismo de autenticación que ya tenemos desarrollado, porque es muy robusto, mucho, muy robusto. Realmente el es este permite. Pues digo que es que cargues los usuarios, se les damos, les damos los permisos.
+
+Ahí serían permisos muy sencillos de dueño nada más. Básicamente y si pierden el la contraseña, pues tienen su correo de reposición. O sea, por eso me gusta ese que está hecho.
+
+Si todo es el mecanismo de autenticación que estás metiendo, ya trae todo eso y funciona, pues está perfecto. Sale, pero entonces así funciona. Sería el usuario de administración, que es el que tenemos nosotros.
+
+Soltamos los usuarios de calendario, o sea, creamos la organización, creamos, creamos la administración, pero la organización creamos los dueños de calendario y los calendarios y lo soltamos y entonces ellos ya entran a hacer su trámite. Y por supuesto, las páginas se colocan o las colocan ellos donde ellos necesiten colocarlas. Así funciona más o menos.
+
+No sé si te respondí la pregunta.
+
+(Transcrito por TurboScribe. Actualizar a Ilimitado para eliminar este mensaje.)

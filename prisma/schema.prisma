@@ -1,0 +1,123 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Organizacion {
+  id         String   @id @default(uuid())
+  nombre     String
+  pais       String
+  region     String
+  imagenUrl  String?
+  leyenda    String?
+  duenos     Dueno[]
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Dueno {
+  id                  String        @id @default(uuid())
+  nombre              String
+  apellido            String
+  puesto              String
+  correo              String
+  tipo                String        // "DUEÑO_DE_CALENDARIO" | "ASISTENTE_DE_TRANSICION"
+  estado              String        @default("ACTIVO") // "ACTIVO" | "AUSENTE_TEMPORAL" | "EN_TRANSICION" | "BAJA"
+  fechaInicioAusencia DateTime?
+  fechaFinAusencia    DateTime?
+  causaAusencia       String?
+  organizacionId      String
+  organizacion        Organizacion  @relation(fields: [organizacionId], references: [id], onDelete: Cascade)
+  calendario          Calendario?
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+}
+
+model Calendario {
+  id                 String             @id @default(uuid())
+  nombre             String
+  duenoId            String             @unique
+  dueno              Dueno              @relation(fields: [duenoId], references: [id], onDelete: Cascade)
+  permitirInvitados  Boolean            @default(true)
+  mensajeCierre      String?
+  imagenPresentacion String?
+  limitesAgendar     Int                @default(0) // en dias/horas
+  limitesCancelar    Int                @default(0)
+  limitesReagendar   Int                @default(0)
+  tiposEventos       TipoEvento[]
+  disponibilidades   Disponibilidad[]
+  fechasEspeciales   FechaEspecial[]
+  eventos            Evento[]
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+}
+
+model TipoEvento {
+  id               String     @id @default(uuid())
+  nombre           String     // "REALIZAR_LLAMADA" | "RECIBIR_LLAMADA" | "CITA_REUNION" | "VIDEOCONFERENCIA"
+  duracion         Int        // en minutos, ej: 15, 30, 45, 60, 75, 90
+  margenSeguridad  Int        // en minutos, ej: 15, 30, 45
+  calendarioId     String
+  calendario       Calendario @relation(fields: [calendarioId], references: [id], onDelete: Cascade)
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+}
+
+model Disponibilidad {
+  id           String     @id @default(uuid())
+  diaSemana    Int        // 0 (Domingo) a 6 (Sábado)
+  horaInicio   String     // "HH:MM"
+  horaFin      String     // "HH:MM"
+  calendarioId String
+  calendario   Calendario @relation(fields: [calendarioId], references: [id], onDelete: Cascade)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+model FechaEspecial {
+  id           String     @id @default(uuid())
+  fecha        DateTime
+  horaInicio   String     // "HH:MM"
+  horaFin      String     // "HH:MM"
+  calendarioId String
+  calendario   Calendario @relation(fields: [calendarioId], references: [id], onDelete: Cascade)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+model Evento {
+  id                String         @id @default(uuid())
+  tema              String
+  fecha             DateTime
+  horaInicio        String         // "HH:MM"
+  duracion          Int            // en minutos
+  estado            String         @default("PENDIENTE") // "PENDIENTE" | "EJECUTADO"
+  archivoAdjuntoUrl String?
+  calendarioId      String
+  calendario        Calendario     @relation(fields: [calendarioId], references: [id], onDelete: Cascade)
+  participantes     Participante[]
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+}
+
+model Participante {
+  id        String   @id @default(uuid())
+  nombre    String
+  apellido  String
+  correo    String
+  telefono  String?
+  esCreador Boolean  @default(false) // true si es el usuario tercero
+  eventoId  String
+  evento    Evento   @relation(fields: [eventoId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
