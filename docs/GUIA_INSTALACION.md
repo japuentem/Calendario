@@ -29,31 +29,31 @@ npm install
 ```
 
 ### 3. Configurar el Archivo de Entorno
-Crea un archivo llamado `.env` en la raíz del proyecto (si no existe ya) con la siguiente línea para definir la ubicación de la base de datos local SQLite:
+Crea un archivo llamado `.env` en la raíz del proyecto (si no existe ya) con tu cadena de conexión a PostgreSQL. Por ejemplo:
 ```env
-DATABASE_URL="file:dev.db"
+DATABASE_URL="postgresql://usuario:contraseña@localhost:5432/nombre_basedatos?schema=public"
 ```
 
 ---
 
 ## 🗄️ Inicialización de la Base de Datos (Prisma)
 
-El proyecto utiliza **Prisma ORM** con un adaptador WebAssembly para SQLite, lo cual evita problemas de compilación en entornos Windows. Sigue estos pasos para estructurar y rellenar la base de datos:
+El proyecto utiliza **Prisma ORM (v7)** con el adaptador `@prisma/adapter-pg` para una integración nativa de alto rendimiento con PostgreSQL. Sigue estos pasos para estructurar y poblar la base de datos:
 
-### 1. Crear y Empujar el Esquema
-Crea el archivo local `dev.db` y sincroniza las tablas de la base de datos con el esquema de Prisma actual:
-```bash
-npx prisma db push
-```
-
-### 2. Generar el Cliente de Prisma
-Genera los tipos estáticos autocompletados de TypeScript para interactuar con la base de datos:
+### 1. Generar el Cliente de Prisma
+Genera los tipos estáticos de TypeScript y compila el motor de consultas para PostgreSQL:
 ```bash
 npx prisma generate
 ```
 
+### 2. Empujar el Esquema a PostgreSQL
+Sincroniza las tablas del esquema en tu base de datos de PostgreSQL:
+```bash
+npx prisma db push
+```
+
 ### 3. Cargar Datos de Prueba (Seed)
-Rellena la base de datos con datos de demostración iniciales (organizaciones como *Tech Solutions*, dueños de calendario como *Juan Pérez*, disponibilidades por defecto y tipos de citas):
+Rellena la base de datos con datos de demostración iniciales (organizaciones, dueños de calendarios, disponibilidades y tipos de citas):
 ```bash
 npx tsx prisma/seed.ts
 ```

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import styles from './page.module.css';
 
 interface Participante {
@@ -75,6 +76,7 @@ interface Owner {
 }
 
 export default function OwnerDashboard() {
+  const router = useRouter();
   const [owners, setOwners] = useState<Owner[]>([]);
   const [selectedOwner, setSelectedOwner] = useState<Owner | null>(null);
   const [events, setEvents] = useState<Evento[]>([]);
@@ -93,6 +95,12 @@ export default function OwnerDashboard() {
     limitesReagendar: 24
   });
 
+  const [ownerForm, setOwnerForm] = useState({
+    nombre: '',
+    apellido: '',
+    puesto: ''
+  });
+
   const [disponibilidades, setDisponibilidades] = useState<Disponibilidad[]>([]);
   const [fechasEspeciales, setFechasEspeciales] = useState<FechaEspecial[]>([]);
   const [tiposEventos, setTiposEventos] = useState<TipoEvento[]>([]);
@@ -101,6 +109,13 @@ export default function OwnerDashboard() {
   // Event actions
   const [activeMenuEventId, setActiveMenuEventId] = useState<string | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState<Evento | null>(null);
+  const [showAddParticipantModal, setShowAddParticipantModal] = useState<Evento | null>(null);
+  const [participantForm, setParticipantForm] = useState({
+    nombre: '',
+    apellido: '',
+    correo: '',
+    telefono: ''
+  });
 
   const fetchOwners = async () => {
     try {
@@ -154,6 +169,11 @@ export default function OwnerDashboard() {
         setFechasEspeciales(selectedOwner.calendario.fechasEspeciales);
         setTiposEventos(selectedOwner.calendario.tiposEventos);
       }
+      setOwnerForm({
+        nombre: selectedOwner.nombre,
+        apellido: selectedOwner.apellido,
+        puesto: selectedOwner.puesto
+      });
     }
   }, [selectedOwner]);
 
@@ -162,7 +182,7 @@ export default function OwnerDashboard() {
     e.preventDefault();
     if (!selectedOwner?.calendario?.id) return;
     try {
-      const res = await fetch(`/api/calendars/${selectedOwner.calendario.id}`, {
+      const resCal = await fetch(`/api/calendars/${selectedOwner.calendario.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -172,9 +192,24 @@ export default function OwnerDashboard() {
           fechasEspeciales
         })
       });
-      if (res.ok) {
+
+      const resOwner = await fetch(`/api/owners/${selectedOwner.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nombre: ownerForm.nombre,
+          apellido: ownerForm.apellido,
+          puesto: ownerForm.puesto,
+          correo: selectedOwner.correo,
+          estado: selectedOwner.estado
+        })
+      });
+
+      if (resCal.ok && resOwner.ok) {
         alert("Configuración guardada exitosamente");
         fetchOwners();
+      } else {
+        alert("Ocurrió un error al guardar la configuración");
       }
     } catch (err) {
       console.error(err);
@@ -390,7 +425,7 @@ export default function OwnerDashboard() {
               <table className={styles.table}>
                 <thead>
                   <tr>
-                    <th>Tema</th>
+                    <th>Tipo de Evento</th>
                     <th>Fecha / Hora</th>
                     <th>Duración</th>
                     <th>Invitado Principal</th>
@@ -416,11 +451,10 @@ export default function OwnerDashboard() {
                           </td>
                           <td>{event.duracion} min</td>
                           <td>
-                            {creator ? (
-                              <div>
-                                <div className={styles.guestName}>{creator.nombre} {creator.apellido}</div>
-                                {totalGuests > 1 && <span className={styles.multipleBadge}>+{totalGuests - 1} adicionales</span>}
-                              </div>
+                            {totalGuests > 1 ? (
+                              <span className={styles.multipleBadge} style={{ background: '#3b82f6', color: '#fff', padding: '0.1rem 0.4rem', borderRadius: '0.25rem', fontSize: '0.75rem', fontWeight: 'bold' }}>MULTIPLE</span>
+                            ) : creator ? (
+                              <div className={styles.guestName}>{creator.nombre} {creator.apellido}</div>
                             ) : (
                               'Desconocido'
                             )}
@@ -446,6 +480,8 @@ export default function OwnerDashboard() {
                                 {event.estado === 'EJECUTADO' && (
                                   <button onClick={() => handleUpdateEventStatus(event.id, 'PENDIENTE')}>⏳ Pendiente</button>
                                 )}
+                                <button onClick={() => { setActiveMenuEventId(null); setShowAddParticipantModal(event); }}>👤 Nuevo Participante</button>
+                                <button onClick={() => { setActiveMenuEventId(null); router.push(`/manage-booking/${event.id}`); }}>🔄 Reprogramar</button>
                                 <button 
                                   className={styles.deleteOption}
                                   onClick={() => handleDeleteEvent(event.id, event.fecha)}
@@ -472,6 +508,33 @@ export default function OwnerDashboard() {
             </div>
 
             <form onSubmit={handleSaveProfile} className={styles.formCard}>
+              <div className={styles.formRow} style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+                <div className={styles.formGroup} style={{ flex: 1 }}>
+                  <label>Nombre del Dueño</label>
+                  <input 
+                    type="text" required
+                    value={ownerForm.nombre}
+                    onChange={(e) => setOwnerForm({ ...ownerForm, nombre: e.target.value })}
+                  />
+                </div>
+                <div className={styles.formGroup} style={{ flex: 1 }}>
+                  <label>Apellido del Dueño</label>
+                  <input 
+                    type="text" required
+                    value={ownerForm.apellido}
+                    onChange={(e) => setOwnerForm({ ...ownerForm, apellido: e.target.value })}
+                  />
+                </div>
+                <div className={styles.formGroup} style={{ flex: 1 }}>
+                  <label>Puesto del Dueño</label>
+                  <input 
+                    type="text" required
+                    value={ownerForm.puesto}
+                    onChange={(e) => setOwnerForm({ ...ownerForm, puesto: e.target.value })}
+                  />
+                </div>
+              </div>
+
               <div className={styles.formGroup}>
                 <label>Nombre del Calendario Público</label>
                 <input 
@@ -762,6 +825,78 @@ export default function OwnerDashboard() {
             <div className={styles.modalActions}>
               <button className={styles.cancelBtn} onClick={() => setShowDetailsModal(null)}>Cerrar</button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Participant Modal */}
+      {showAddParticipantModal && (
+        <div className={styles.modalOverlay} onClick={() => setShowAddParticipantModal(null)}>
+          <div className={styles.modal} onClick={e => e.stopPropagation()}>
+            <h2>Añadir Nuevo Participante</h2>
+            <form onSubmit={async (e) => {
+              e.preventDefault();
+              try {
+                const res = await fetch(`/api/bookings/${showAddParticipantModal.id}/participants`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(participantForm),
+                });
+                if (res.ok) {
+                  alert("Participante añadido con éxito");
+                  setShowAddParticipantModal(null);
+                  setParticipantForm({ nombre: '', apellido: '', correo: '', telefono: '' });
+                  fetchEvents();
+                } else {
+                  const data = await res.json();
+                  alert(data.error || "Error al añadir participante");
+                }
+              } catch (err) {
+                console.error(err);
+                alert("Error de red");
+              }
+            }} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div className={styles.formGroup}>
+                <label style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.85rem', color: '#94a3b8' }}>Nombre *</label>
+                <input 
+                  type="text" required
+                  value={participantForm.nombre}
+                  onChange={e => setParticipantForm({ ...participantForm, nombre: e.target.value })}
+                  style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff' }}
+                />
+              </div>
+              <div className={styles.formGroup}>
+                <label style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.85rem', color: '#94a3b8' }}>Apellido</label>
+                <input 
+                  type="text"
+                  value={participantForm.apellido}
+                  onChange={e => setParticipantForm({ ...participantForm, apellido: e.target.value })}
+                  style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff' }}
+                />
+              </div>
+              <div className={styles.formGroup}>
+                <label style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.85rem', color: '#94a3b8' }}>Correo Electrónico *</label>
+                <input 
+                  type="email" required
+                  value={participantForm.correo}
+                  onChange={e => setParticipantForm({ ...participantForm, correo: e.target.value })}
+                  style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff' }}
+                />
+              </div>
+              <div className={styles.formGroup}>
+                <label style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.85rem', color: '#94a3b8' }}>Teléfono</label>
+                <input 
+                  type="tel"
+                  value={participantForm.telefono}
+                  onChange={e => setParticipantForm({ ...participantForm, telefono: e.target.value })}
+                  style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff' }}
+                />
+              </div>
+              <div className={styles.modalActions} style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '1rem' }}>
+                <button type="button" className={styles.cancelBtn} onClick={() => setShowAddParticipantModal(null)}>Cancelar</button>
+                <button type="submit" className={styles.primaryBtn} style={{ background: '#3b82f6', color: '#fff', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '0.75rem', fontWeight: 'bold', cursor: 'pointer' }}>Añadir</button>
+              </div>
+            </form>
           </div>
         </div>
       )}
