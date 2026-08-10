@@ -69,6 +69,17 @@ a {
   --glass-blur: blur(12px);
   --text-light: #0f172a; /* Texto oscuro para la cabecera blanca */
   --text-light-muted: #64748b;
+
+  /* Variables para tarjetas y modales de alto contraste (diseño premium híbrido) */
+  --card-bg: #1e293b;
+  --card-border: rgba(255, 255, 255, 0.15);
+  --card-text-title: #ffffff;
+  --card-text-body: #e2e8f0;
+  --card-text-muted: #cbd5e1;
+  --card-block-bg: #0f172a;
+  --card-block-selected-bg: rgba(56, 189, 248, 0.18);
+  --card-block-disabled-bg: rgba(15, 23, 42, 0.7);
+  --card-input-bg: #0f172a;
 }
 
 @media (prefers-color-scheme: dark) {

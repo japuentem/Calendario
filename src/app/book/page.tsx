@@ -51,8 +51,8 @@ export default function BookAppointment() {
   const [invitados, setInvitados] = useState<string[]>([]);
   const [newInvitadoCorreo, setNewInvitadoCorreo] = useState('');
 
-  // Flow control: 'select' | 'contact' | 'success'
-  const [flowMode, setFlowMode] = useState<'select' | 'contact' | 'success'>('select');
+  // Flow control: 'pantalla1_select_day' | 'pantalla2_select_slot' | 'pantalla3_contact_data' | 'pantalla4_success'
+  const [flowMode, setFlowMode] = useState<'pantalla1_select_day' | 'pantalla2_select_slot' | 'pantalla3_contact_data' | 'pantalla4_success'>('pantalla1_select_day');
   const [createdEvent, setCreatedEvent] = useState<any>(null);
 
   useEffect(() => {
@@ -72,6 +72,20 @@ export default function BookAppointment() {
   const activeOwner = activeOrg?.duenos.find(o => o.id === selectedOwnerId);
   const activeCalendar = activeOwner?.calendario;
   const activeEventType = activeCalendar?.tiposEventos?.find(t => t.id === selectedEventTypeId);
+
+  // Set default event type to CITA_REUNION or CITA / REUNION if available
+  useEffect(() => {
+    if (activeCalendar && !selectedEventTypeId) {
+      const defaultType = activeCalendar.tiposEventos.find(
+        t => t.nombre === 'CITA_REUNION' || t.nombre === 'CITA / REUNION' || t.nombre.includes('CITA')
+      );
+      if (defaultType) {
+        setSelectedEventTypeId(defaultType.id);
+      } else if (activeCalendar.tiposEventos.length > 0) {
+        setSelectedEventTypeId(activeCalendar.tiposEventos[0].id);
+      }
+    }
+  }, [activeCalendar, selectedEventTypeId]);
 
   // Compute available slots when date or event type changes
   useEffect(() => {
@@ -202,6 +216,11 @@ export default function BookAppointment() {
       return alert("Completa los datos obligatorios");
     }
 
+    const isPhoneRequired = activeEventType?.nombre === 'RECIBIR_LLAMADA';
+    if (isPhoneRequired && !contacto.telefono) {
+      return alert("El teléfono es obligatorio para este tipo de evento");
+    }
+
     try {
       const res = await fetch('/api/bookings', {
         method: 'POST',
@@ -223,7 +242,7 @@ export default function BookAppointment() {
       if (res.ok) {
         const data = await res.json();
         setCreatedEvent(data);
-        setFlowMode('success');
+        setFlowMode('pantalla4_success');
       }
     } catch (err) {
       console.error(err);
@@ -236,11 +255,13 @@ export default function BookAppointment() {
     ? `${contacto.nombre} ${contacto.apellido}` 
     : 'Invitado Tercero';
 
-  const actorPageText = flowMode === 'select' 
-    ? 'RESERVA / SELECCIÓN' 
-    : flowMode === 'contact' 
-      ? 'RESERVA / CONTACTO' 
-      : 'RESERVA / CONFIRMACIÓN';
+  const actorPageText = flowMode === 'pantalla1_select_day' 
+    ? 'RESERVA / SELECCIÓN DÍA' 
+    : flowMode === 'pantalla2_select_slot'
+      ? 'RESERVA / SELECCIÓN HORA'
+      : flowMode === 'pantalla3_contact_data' 
+        ? 'RESERVA / CONTACTO' 
+        : 'RESERVA / CONFIRMACIÓN';
 
   return (
     <div className={styles.container}>
@@ -263,14 +284,17 @@ export default function BookAppointment() {
           <div className={styles.centerHeader}>
             <span className={styles.actorRole}>INVITADO / TERCERO</span>
             <div className={styles.steps}>
-              <div className={flowMode === 'select' ? styles.stepActive : styles.step}>
-                1. Selección
+              <div className={flowMode === 'pantalla1_select_day' ? styles.stepActive : styles.step}>
+                1. Día
               </div>
-              <div className={flowMode === 'contact' ? styles.stepActive : styles.step}>
-                2. Contacto
+              <div className={flowMode === 'pantalla2_select_slot' ? styles.stepActive : styles.step}>
+                2. Hora
               </div>
-              <div className={flowMode === 'success' ? styles.stepActive : styles.step}>
-                3. Confirmación
+              <div className={flowMode === 'pantalla3_contact_data' ? styles.stepActive : styles.step}>
+                3. Contacto
+              </div>
+              <div className={flowMode === 'pantalla4_success' ? styles.stepActive : styles.step}>
+                4. Confirmación
               </div>
             </div>
           </div>
@@ -280,14 +304,14 @@ export default function BookAppointment() {
             <span className={styles.actorName}>{actorNameText}</span>
             <span className={styles.actorPage}>{actorPageText}</span>
             <Link href="/" className={styles.exitBtn}>
-              GUARDAR Y SALIR
+              SALIR
             </Link>
           </div>
         </div>
       </header>
 
       <main className={styles.main}>
-        {flowMode === 'select' && (
+        {(flowMode === 'pantalla1_select_day' || flowMode === 'pantalla2_select_slot') && (
           <div className={styles.bookingSplit}>
             {/* Left Panel: Details Form */}
             <div className={styles.leftPanel}>
@@ -373,7 +397,7 @@ export default function BookAppointment() {
                   <button 
                     type="button" 
                     className={styles.changeOwnerBtn}
-                    onClick={() => { setSelectedOwnerId(''); setSelectedEventTypeId(''); setSelectedDateStr(''); }}
+                    onClick={() => { setSelectedOwnerId(''); setSelectedEventTypeId(''); setSelectedDateStr(''); setSelectedSlot(''); }}
                   >
                     ← Cambiar Profesional
                   </button>
@@ -426,7 +450,7 @@ export default function BookAppointment() {
                     })}
                   </div>
 
-                  {selectedDateStr && (
+                  {flowMode === 'pantalla2_select_slot' && selectedDateStr && (
                     <div className={styles.slotsArea}>
                       <h4>Horarios disponibles para el {new Date(selectedDateStr).toLocaleDateString()}:</h4>
                       {isLoadingSlots ? (
@@ -458,7 +482,7 @@ export default function BookAppointment() {
           </div>
         )}
 
-        {flowMode === 'contact' && (
+        {flowMode === 'pantalla3_contact_data' && (
           <div className={styles.contactFormCard}>
             <h2>Indícanos quién solicita y a dónde enviar por favor</h2>
             <form onSubmit={handleSubmitBooking}>
@@ -499,15 +523,67 @@ export default function BookAppointment() {
                 />
               </div>
 
+              {/* RG-003: Allow adding guests only if type is VIDEOCONFERENCIA or CITA_REUNION */}
+              {(activeEventType?.nombre === 'VIDEOCONFERENCIA' || activeEventType?.nombre === 'CITA_REUNION' || activeEventType?.nombre === 'CITA / REUNION') && (
+                <div className={styles.formGroup}>
+                  <label>PUEDE AGREGAR INVITADOS A ESTE EVENTO</label>
+                  <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.25rem' }}>
+                    <input 
+                      type="email" 
+                      placeholder="ejemplo@correo.com"
+                      value={newInvitadoCorreo}
+                      onChange={(e) => setNewInvitadoCorreo(e.target.value)}
+                      style={{ flex: 1 }}
+                    />
+                    <button 
+                      type="button" 
+                      onClick={() => {
+                        if (newInvitadoCorreo && !invitados.includes(newInvitadoCorreo)) {
+                          setInvitados([...invitados, newInvitadoCorreo]);
+                          setNewInvitadoCorreo('');
+                        }
+                      }}
+                      style={{
+                        background: '#0d9488',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '0.5rem',
+                        padding: '0 1rem',
+                        cursor: 'pointer',
+                        fontWeight: 'bold'
+                      }}
+                    >
+                      +
+                    </button>
+                  </div>
+                  {invitados.length > 0 && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', marginTop: '0.5rem' }}>
+                      {invitados.map(correo => (
+                        <div key={correo} style={{ display: 'flex', justifyContent: 'space-between', background: 'rgba(255,255,255,0.05)', padding: '0.4rem 0.75rem', borderRadius: '0.25rem' }}>
+                          <span>{correo}</span>
+                          <button 
+                            type="button" 
+                            onClick={() => setInvitados(invitados.filter(i => i !== correo))}
+                            style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
               <div className={styles.btnRow}>
-                <button type="button" className={styles.cancelBtn} onClick={() => setFlowMode('select')}>Atrás</button>
+                <button type="button" className={styles.cancelBtn} onClick={() => setFlowMode('pantalla2_select_slot')}>Atrás</button>
                 <button type="submit" className={styles.submitBtn}>Enviar</button>
               </div>
             </form>
           </div>
         )}
 
-        {flowMode === 'success' && createdEvent && (
+        {flowMode === 'pantalla4_success' && createdEvent && (
           <div className={styles.successCard}>
             <div className={styles.successIcon}>✓</div>
             <h2>¡Reserva confirmada!</h2>
@@ -526,12 +602,24 @@ export default function BookAppointment() {
         )}
       </main>
 
-      {flowMode === 'select' && (
+      {flowMode === 'pantalla1_select_day' && (
         <footer className={styles.footer}>
           <button 
             className={styles.footerSubmitBtn} 
-            disabled={!selectedOwnerId || !selectedEventTypeId || !selectedDateStr || !selectedSlot || !theme}
-            onClick={() => setFlowMode('contact')}
+            disabled={!selectedOwnerId || !selectedEventTypeId || !selectedDateStr}
+            onClick={() => setFlowMode('pantalla2_select_slot')}
+          >
+            INDICANOS CORREO
+          </button>
+        </footer>
+      )}
+
+      {flowMode === 'pantalla2_select_slot' && (
+        <footer className={styles.footer}>
+          <button 
+            className={styles.footerSubmitBtn} 
+            disabled={!selectedSlot}
+            onClick={() => setFlowMode('pantalla3_contact_data')}
           >
             INDICANOS CORREO
           </button>

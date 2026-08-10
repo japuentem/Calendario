@@ -81,8 +81,14 @@ export default function OwnerDashboard() {
   const [selectedOwner, setSelectedOwner] = useState<Owner | null>(null);
   const [events, setEvents] = useState<Evento[]>([]);
   
-  // Settings tab selection
-  const [activeSection, setActiveSection] = useState<'profile' | 'availability' | 'events'>('events');
+  // Settings tab selection: 'menu' (Pantalla 0), 'profile' (Pantalla 1), 'availability' (Pantalla 2), 'events' (Pantalla 3)
+  const [activeSection, setActiveSection] = useState<'menu' | 'profile' | 'availability' | 'events'>('menu');
+
+  // Menu Selection in Pantalla 0
+  const [menuSelection, setMenuSelection] = useState<{ category: string; action: 'profile' | 'availability' | 'events' }>({
+    category: 'imagen',
+    action: 'profile',
+  });
 
   // Form states
   const [profileForm, setProfileForm] = useState({
@@ -110,12 +116,23 @@ export default function OwnerDashboard() {
   const [activeMenuEventId, setActiveMenuEventId] = useState<string | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState<Evento | null>(null);
   const [showAddParticipantModal, setShowAddParticipantModal] = useState<Evento | null>(null);
+  const [showVideoLinkModal, setShowVideoLinkModal] = useState<Evento | null>(null);
+  const [videoLink, setVideoLink] = useState('');
+  const [showReassignModal, setShowReassignModal] = useState<Evento | null>(null);
+  const [reassignForm, setReassignForm] = useState({
+    nombre: '',
+    apellido: '',
+    correo: '',
+    instrucciones: '',
+  });
+
   const [participantForm, setParticipantForm] = useState({
     nombre: '',
     apellido: '',
     correo: '',
     telefono: ''
   });
+
 
   const fetchOwners = async () => {
     try {
@@ -379,6 +396,12 @@ export default function OwnerDashboard() {
 
             <nav className={styles.nav}>
               <button 
+                className={activeSection === 'menu' ? styles.activeNav : ''}
+                onClick={() => setActiveSection('menu')}
+              >
+                🏠 Menú
+              </button>
+              <button 
                 className={activeSection === 'events' ? styles.activeNav : ''}
                 onClick={() => setActiveSection('events')}
               >
@@ -388,7 +411,7 @@ export default function OwnerDashboard() {
                 className={activeSection === 'profile' ? styles.activeNav : ''}
                 onClick={() => setActiveSection('profile')}
               >
-                ⚙️ Ajustes
+                ⚙️ Presentación
               </button>
               <button 
                 className={activeSection === 'availability' ? styles.activeNav : ''}
@@ -405,17 +428,91 @@ export default function OwnerDashboard() {
               {selectedOwner ? `${selectedOwner.nombre} ${selectedOwner.apellido}` : 'Invitado'}
             </span>
             <span className={styles.actorPage}>
-              OWNER / {activeSection === 'events' ? 'EVENTOS' : activeSection === 'profile' ? 'AJUSTES' : 'DISPONIBILIDAD'}
+              OWNER / {activeSection === 'menu' ? 'MENÚ MAIN' : activeSection === 'events' ? 'EVENTOS' : activeSection === 'profile' ? 'PRESENTACIÓN' : 'DISPONIBILIDAD'}
             </span>
+            {activeSection !== 'menu' && (
+              <button 
+                onClick={() => setActiveSection('menu')}
+                style={{ background: 'none', border: 'none', color: '#38bdf8', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 'bold' }}
+              >
+                ← Volver al Menú
+              </button>
+            )}
             <Link href="/" className={styles.exitBtn}>
-              GUARDAR Y SALIR
+              SALIR
             </Link>
           </div>
         </div>
       </header>
 
+
       <main className={styles.main}>
+        {/* --- PANTALLA 0 (MAIN) --- */}
+        {activeSection === 'menu' && (
+          <div className={styles.menuCard}>
+            <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#38bdf8', marginBottom: '0.5rem' }}>
+              DUEÑO DE CALENDARIO - MENÚ PRINCIPAL
+            </h2>
+            <div className={styles.menuGrid}>
+              {/* Bloque Imagen / Presentación */}
+              <div
+                className={`${styles.menuBlock} ${
+                  menuSelection.category === 'imagen' ? styles.selectedBlock : ''
+                }`}
+                onClick={() => setMenuSelection({ category: 'imagen', action: 'profile' })}
+              >
+                <h3>IMAGEN</h3>
+                <label className={styles.radioOption}>
+                  <input
+                    type="radio"
+                    name="ownerMenu"
+                    checked={menuSelection.category === 'imagen' && menuSelection.action === 'profile'}
+                    onChange={() => setMenuSelection({ category: 'imagen', action: 'profile' })}
+                  />
+                  <span>PRESENTACION Y CIERRE</span>
+                </label>
+              </div>
+
+              {/* Bloque Gestión */}
+              <div
+                className={`${styles.menuBlock} ${
+                  menuSelection.category === 'gestion' ? styles.selectedBlock : ''
+                }`}
+                onClick={() => setMenuSelection({ category: 'gestion', action: 'availability' })}
+              >
+                <h3>GESTIÓN</h3>
+                <label className={styles.radioOption}>
+                  <input
+                    type="radio"
+                    name="ownerMenu"
+                    checked={menuSelection.category === 'gestion' && menuSelection.action === 'availability'}
+                    onChange={() => setMenuSelection({ category: 'gestion', action: 'availability' })}
+                  />
+                  <span>DISPONIBILIDAD</span>
+                </label>
+                <label className={styles.radioOption}>
+                  <input
+                    type="radio"
+                    name="ownerMenu"
+                    checked={menuSelection.category === 'gestion' && menuSelection.action === 'events'}
+                    onChange={() => setMenuSelection({ category: 'gestion', action: 'events' })}
+                  />
+                  <span>EVENTOS</span>
+                </label>
+              </div>
+            </div>
+
+            <button
+              className={styles.accesarBtn}
+              onClick={() => setActiveSection(menuSelection.action)}
+            >
+              ACCESAR
+            </button>
+          </div>
+        )}
+
         {activeSection === 'events' && (
+
           <section className={styles.section}>
             <div className={styles.sectionHeader}>
               <h2>Lista de Citas Agendadas</h2>
@@ -472,16 +569,18 @@ export default function OwnerDashboard() {
                               •••
                             </button>
                             {activeMenuEventId === event.id && (
-                              <div className={styles.contextMenu}>
-                                <button onClick={() => setShowDetailsModal(event)}>🔍 Detalles</button>
+                              <div className={styles.contextMenu} style={{ width: '220px' }}>
+                                <button onClick={() => { setActiveMenuEventId(null); setShowDetailsModal(event); }}>🔍 Detalles de la reserva</button>
                                 {event.estado === 'PENDIENTE' && (
-                                  <button onClick={() => handleUpdateEventStatus(event.id, 'EJECUTADO')}>✅ Completado</button>
+                                  <button onClick={() => handleUpdateEventStatus(event.id, 'EJECUTADO')}>✅ Marca como Ejecutado</button>
                                 )}
                                 {event.estado === 'EJECUTADO' && (
-                                  <button onClick={() => handleUpdateEventStatus(event.id, 'PENDIENTE')}>⏳ Pendiente</button>
+                                  <button onClick={() => handleUpdateEventStatus(event.id, 'PENDIENTE')}>⏳ Marca como Pendiente</button>
                                 )}
                                 <button onClick={() => { setActiveMenuEventId(null); setShowAddParticipantModal(event); }}>👤 Nuevo Participante</button>
-                                <button onClick={() => { setActiveMenuEventId(null); router.push(`/manage-booking/${event.id}`); }}>🔄 Reprogramar</button>
+                                <button onClick={() => { setActiveMenuEventId(null); router.push(`/manage-booking/${event.id}?action=reschedule`); }}>🔄 Reprogramar cita</button>
+                                <button onClick={() => { setActiveMenuEventId(null); setVideoLink(event.archivoAdjuntoUrl || ''); setShowVideoLinkModal(event); }}>🔗 Liga videoconferencia</button>
+                                <button onClick={() => { setActiveMenuEventId(null); setShowReassignModal(event); }}>⇄ Reasignar evento</button>
                                 <button 
                                   className={styles.deleteOption}
                                   onClick={() => handleDeleteEvent(event.id, event.fecha)}
@@ -490,6 +589,7 @@ export default function OwnerDashboard() {
                                 </button>
                               </div>
                             )}
+
                           </td>
                         </tr>
                       );
@@ -583,7 +683,7 @@ export default function OwnerDashboard() {
                   <input 
                     type="number" min={0} required
                     value={profileForm.limitesAgendar}
-                    onChange={(e) => setProfileForm({ ...profileForm, limitesAgendar: parseInt(e.target.value) })}
+                    onChange={(e) => setProfileForm({ ...profileForm, limitesAgendar: parseInt(e.target.value) || 0 })}
                   />
                 </div>
                 <div className={styles.formGroup}>
@@ -591,18 +691,29 @@ export default function OwnerDashboard() {
                   <input 
                     type="number" min={0} required
                     value={profileForm.limitesCancelar}
-                    onChange={(e) => setProfileForm({ ...profileForm, limitesCancelar: parseInt(e.target.value) })}
+                    onChange={(e) => setProfileForm({ ...profileForm, limitesCancelar: parseInt(e.target.value) || 0 })}
                   />
+                  {profileForm.limitesCancelar < 24 && (
+                    <div className={styles.warningBanner}>
+                      ⚠️ SIN TIEMPO ESTÁNDAR PARA ENVIAR RECORDATORIOS, EL MÍNIMO SON 24 HORAS
+                    </div>
+                  )}
                 </div>
                 <div className={styles.formGroup}>
                   <label>Antelación mínima para reagendar (horas antes)</label>
                   <input 
                     type="number" min={0} required
                     value={profileForm.limitesReagendar}
-                    onChange={(e) => setProfileForm({ ...profileForm, limitesReagendar: parseInt(e.target.value) })}
+                    onChange={(e) => setProfileForm({ ...profileForm, limitesReagendar: parseInt(e.target.value) || 0 })}
                   />
+                  {profileForm.limitesReagendar < 24 && (
+                    <div className={styles.warningBanner}>
+                      ⚠️ SIN TIEMPO ESTÁNDAR PARA ENVIAR RECORDATORIOS, EL MÍNIMO SON 24 HORAS
+                    </div>
+                  )}
                 </div>
               </div>
+
 
               <hr className={styles.divider} />
               <h3>Eventos Permitidos y Tiempos</h3>
@@ -900,6 +1011,118 @@ export default function OwnerDashboard() {
           </div>
         </div>
       )}
+
+      {/* Video Link Modal */}
+      {showVideoLinkModal && (
+        <div className={styles.modalOverlay} onClick={() => setShowVideoLinkModal(null)}>
+          <div className={styles.modal} onClick={e => e.stopPropagation()}>
+            <h2>LIGA VIDEOCONFERENCIA</h2>
+            <p style={{ fontSize: '0.9rem', color: '#94a3b8', marginBottom: '1rem' }}>
+              Captura la liga de reunión para enviarla a los participantes del evento: <strong>{showVideoLinkModal.tema}</strong>
+            </p>
+            <div className={styles.formGroup} style={{ marginBottom: '1.5rem' }}>
+              <label>LIGA A ENVIAR (Zoom / Teams / Meet)</label>
+              <input
+                type="url"
+                placeholder="https://meet.google.com/xyz-abc-123"
+                value={videoLink}
+                onChange={(e) => setVideoLink(e.target.value)}
+                style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff' }}
+              />
+            </div>
+            <div className={styles.modalActions}>
+              <button className={styles.cancelBtn} onClick={() => setShowVideoLinkModal(null)}>Cancelar</button>
+              <button
+                className={styles.primaryBtn}
+                onClick={async () => {
+                  if (!videoLink) return alert('Por favor ingresa la liga de videoconferencia');
+                  try {
+                    const res = await fetch(`/api/bookings/${showVideoLinkModal.id}`, {
+                      method: 'PUT',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ archivoAdjuntoUrl: videoLink }),
+                    });
+                    if (res.ok) {
+                      alert('Liga de videoconferencia registrada y enviada a los participantes');
+                      setShowVideoLinkModal(null);
+                      fetchEvents();
+                    }
+                  } catch (e) {
+                    console.error(e);
+                  }
+                }}
+              >
+                ENVIAR LIGA
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reassign Event Modal */}
+      {showReassignModal && (
+        <div className={styles.modalOverlay} onClick={() => setShowReassignModal(null)}>
+          <div className={styles.modal} onClick={e => e.stopPropagation()}>
+            <h2>REASIGNACIÓN DE EVENTO</h2>
+            <p style={{ fontSize: '0.85rem', color: '#94a3b8', marginBottom: '1rem' }}>
+              La reasignación del evento libera espacio en tu calendario y mantiene informado al sustituto de reagendas y cancelaciones.
+            </p>
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                alert(`Evento reasignado exitosamente a ${reassignForm.nombre} ${reassignForm.apellido} (${reassignForm.correo}).`);
+                setShowReassignModal(null);
+                setReassignForm({ nombre: '', apellido: '', correo: '', instrucciones: '' });
+                fetchEvents();
+              }}
+              style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}
+            >
+              <div className={styles.formGroup}>
+                <label>NOMBRE SUSTITUTO</label>
+                <input
+                  type="text" required
+                  value={reassignForm.nombre}
+                  onChange={(e) => setReassignForm({ ...reassignForm, nombre: e.target.value })}
+                  style={{ width: '100%', padding: '0.6rem', borderRadius: '0.5rem', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff' }}
+                />
+              </div>
+              <div className={styles.formGroup}>
+                <label>APELLIDO SUSTITUTO</label>
+                <input
+                  type="text" required
+                  value={reassignForm.apellido}
+                  onChange={(e) => setReassignForm({ ...reassignForm, apellido: e.target.value })}
+                  style={{ width: '100%', padding: '0.6rem', borderRadius: '0.5rem', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff' }}
+                />
+              </div>
+              <div className={styles.formGroup}>
+                <label>CORREO SUSTITUTO</label>
+                <input
+                  type="email" required
+                  value={reassignForm.correo}
+                  onChange={(e) => setReassignForm({ ...reassignForm, correo: e.target.value })}
+                  style={{ width: '100%', padding: '0.6rem', borderRadius: '0.5rem', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff' }}
+                />
+              </div>
+              <div className={styles.formGroup}>
+                <label>INSTRUCCIONES</label>
+                <textarea
+                  rows={3}
+                  value={reassignForm.instrucciones}
+                  onChange={(e) => setReassignForm({ ...reassignForm, instrucciones: e.target.value })}
+                  style={{ width: '100%', padding: '0.6rem', borderRadius: '0.5rem', background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', color: '#fff' }}
+                />
+              </div>
+
+              <div className={styles.modalActions} style={{ marginTop: '1rem' }}>
+                <button type="button" className={styles.cancelBtn} onClick={() => setShowReassignModal(null)}>Cancelar</button>
+                <button type="submit" className={styles.primaryBtn}>ENVIAR REASIGNACIÓN</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+

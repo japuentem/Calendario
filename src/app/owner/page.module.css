@@ -202,8 +202,8 @@
 }
 
 .tableWrapper {
-  background: rgba(30, 41, 59, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
   border-radius: 1.25rem;
   overflow: hidden;
 }
@@ -216,25 +216,25 @@
 
 .table th, .table td {
   padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid var(--card-border);
 }
 
 .table th {
   font-weight: 600;
   font-size: 0.9rem;
-  color: #94a3b8;
-  background: rgba(15, 23, 42, 0.2);
+  color: var(--card-text-muted);
+  background: var(--card-block-bg);
 }
 
 .emptyTable {
   text-align: center;
-  color: #64748b;
+  color: var(--card-text-muted);
   padding: 3rem 0;
 }
 
 .eventName {
   font-weight: 600;
-  color: #f8fafc;
+  color: var(--card-text-title);
 }
 
 .dateText {
@@ -250,7 +250,7 @@
 
 .guestName {
   font-weight: 500;
-  color: #cbd5e1;
+  color: var(--card-text-body);
 }
 
 .multipleBadge {
@@ -345,8 +345,8 @@
 
 /* Form Styles */
 .formCard {
-  background: rgba(30, 41, 59, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
   border-radius: 1.5rem;
   padding: 2.5rem;
   display: flex;
@@ -361,7 +361,7 @@
 }
 
 .desc {
-  color: #94a3b8;
+  color: var(--card-text-muted);
   font-size: 0.95rem;
   margin: 0 0 1rem 0;
   line-height: 1.5;
@@ -376,15 +376,15 @@
 .formGroup label {
   font-size: 0.85rem;
   font-weight: 600;
-  color: #94a3b8;
+  color: var(--card-text-muted);
 }
 
 .formGroup input, .formGroup select, .formGroup textarea {
-  background: rgba(15, 23, 42, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--card-input-bg);
+  border: 1px solid var(--card-border);
   border-radius: 0.75rem;
   padding: 0.75rem 1rem;
-  color: #f8fafc;
+  color: var(--card-text-body);
   font-family: inherit;
   font-size: 0.95rem;
   transition: border-color 0.2s ease;
@@ -758,3 +758,97 @@
   background: rgba(255, 255, 255, 0.05);
   color: #f8fafc;
 }
+
+/* --- ESTILOS DE PANTALLA 0 Y NUEVOS MODALES DE DUEÑO --- */
+.warningBanner {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid #ef4444;
+  color: #fca5a5;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 700;
+  font-size: 0.85rem;
+  margin-top: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.menuCard {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 1.5rem;
+  padding: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  width: 100%;
+}
+
+.menuGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.menuBlock {
+  background: var(--card-block-bg);
+  border: 2px solid var(--card-border);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.menuBlock:hover {
+  border-color: #38bdf8;
+}
+
+.selectedBlock {
+  border-color: #38bdf8;
+  background: var(--card-block-selected-bg);
+}
+
+.menuBlock h3 {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #38bdf8;
+  margin: 0 0 0.5rem 0;
+}
+
+.radioOption {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.95rem;
+  color: var(--card-text-body);
+  cursor: pointer;
+}
+
+.radioOption input {
+  width: 1.1rem;
+  height: 1.1rem;
+  accent-color: #38bdf8;
+}
+
+.accesarBtn {
+  background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+  border: none;
+  color: white;
+  padding: 0.8rem 3rem;
+  border-radius: 0.5rem;
+  font-weight: 800;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.accesarBtn:hover {
+  opacity: 0.9;
+}
+

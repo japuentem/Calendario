@@ -126,7 +126,7 @@
 }
 
 .main {
-  max-width: 600px;
+  max-width: 1200px;
   width: 95%;
   margin: 2rem auto;
   padding: 2.5rem 2rem;
@@ -138,8 +138,10 @@
 }
 
 .card {
-  background: rgba(30, 41, 59, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  max-width: 600px;
+  margin: 0 auto;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
   border-radius: 1.5rem;
   padding: 2.5rem;
   display: flex;
@@ -154,10 +156,10 @@
 }
 
 .eventSummary {
-  background: rgba(15, 23, 42, 0.3);
+  background: var(--card-block-bg);
   padding: 1.5rem;
   border-radius: 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--card-border);
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -227,6 +229,7 @@
   justify-content: space-between;
   align-items: center;
   margin-top: 1rem;
+  gap: 1rem;
 }
 
 .backBtn {
@@ -318,17 +321,18 @@
 }
 
 .formGroup label {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #94a3b8;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--card-text-muted);
+  letter-spacing: 0.05em;
 }
 
 .formGroup input {
-  background: rgba(15, 23, 42, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--card-input-bg);
+  border: 1px solid var(--card-border);
   border-radius: 0.75rem;
   padding: 0.75rem 1rem;
-  color: #f8fafc;
+  color: var(--card-text-body);
   font-family: inherit;
   font-size: 0.95rem;
   outline: none;
@@ -390,4 +394,187 @@
 
 .errorMsg {
   color: #ef4444;
+}
+
+/* Split layout for rescheduling */
+.bookingSplit {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 2.5rem;
+  align-items: start;
+}
+
+.leftPanel {
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: 1.25rem;
+  padding: 2rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  color: #0f172a;
+}
+
+.rightPanel {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 1.25rem;
+  padding: 2.5rem;
+  min-height: 480px;
+  display: flex;
+  flex-direction: column;
+}
+
+.ownerHeader {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  padding-bottom: 1.25rem;
+}
+
+.avatar {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #0d9488;
+}
+
+.avatarPlaceholder {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+  background: rgba(99, 102, 241, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+.ownerHeader h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 0;
+  color: #0f172a;
+}
+
+.puesto {
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.staticField {
+  background: rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  color: #1e293b;
+  font-size: 0.95rem;
+}
+
+.timezoneArea {
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+/* Calendar Container & components inside manage booking */
+.calendarContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.calendarHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.calendarHeader h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.calendarArrows {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.calendarArrows button {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #cbd5e1;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+}
+
+.calendarArrows button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #f8fafc;
+}
+
+.calendarGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.5rem;
+  text-align: center;
+}
+
+.dayOfWeek {
+  font-size: 0.8rem;
+  color: #64748b;
+  font-weight: 600;
+  padding: 0.5rem 0;
+}
+
+.emptyDay {
+  height: 2.5rem;
+}
+
+.dayBtn {
+  height: 2.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid transparent;
+  background: none;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.availableDay {
+  color: #cbd5e1;
+  background: rgba(15, 23, 42, 0.4);
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+.availableDay:hover {
+  border-color: #0d9488;
+  background: rgba(13, 148, 136, 0.05);
+}
+
+.selectedDay {
+  background: #0d9488 !important;
+  color: #0f172a !important;
+  border-color: #0d9488 !important;
+}
+
+.disabledDay {
+  color: #334155;
+  cursor: not-allowed;
+}
+
+.slotsArea {
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 1.5rem;
+  margin-top: 1rem;
+}
+
+.slotsArea h4 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin: 0 0 1rem 0;
 }

@@ -121,3 +121,28 @@ model Participante {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model Comunicacion {
+  id               String   @id @default(uuid())
+  codigo           String   // Ej: COM-001, COMMX-001
+  nombre           String   // Ej: CONFIRMACION EVENTO - SOLICITANTE
+  pais             String?  @default("México")
+  tipoComunicacion String   @default("CORREO") // "CORREO", "WHATSAPP", "MENSAJE"
+  tipoActivador    String   // "EVENTO" | "REGLA"
+  idActivador      String?  // Ej: CALMX-001
+  accionActivador  String?  // Ej: SOLICITUD EVENTO USUARIO, RECORDATORIO SW EVENTO
+  horasRelativas   Int?     // Horas antes/después si es por REGLA (Ej: 24)
+  incluirFinSemana Boolean  @default(true)
+  origen           String   @default("ORGANIZACION")
+  segmento         String   @default("TODOS")
+  destinatarios    String   // JSON stringified array ej ["SOLICITANTE", "DUEÑO_CALENDARIO"]
+  asuntoHeader     String   // Plantilla del Asunto con variables
+  mensajeCopy      String   // Plantilla del Mensaje con variables y enlaces CTAs
+  variables        String?  // JSON stringified de variables y sus reglas
+  enlacesAcciones  String?  // JSON stringified de CTAs
+  adjuntos         String?  // JSON stringified de archivos adjuntos
+  status           String   @default("ACTIVO") // "ACTIVO" | "NO_ACTIVO"
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+

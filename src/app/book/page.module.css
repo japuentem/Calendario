@@ -238,16 +238,16 @@
 .formGroup label {
   font-size: 0.8rem;
   font-weight: 700;
-  color: #cbd5e1;
+  color: var(--card-text-muted);
   letter-spacing: 0.05em;
 }
 
 .formGroup select, .formGroup textarea, .formGroup input {
-  background: rgba(15, 23, 42, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--card-input-bg);
+  border: 1px solid var(--card-border);
   border-radius: 0.5rem;
   padding: 0.75rem;
-  color: #f8fafc;
+  color: var(--card-text-body);
   font-family: inherit;
   font-size: 0.95rem;
   outline: none;
@@ -291,7 +291,7 @@
 
 .timezoneArea {
   font-size: 0.8rem;
-  color: #64748b;
+  color: #cbd5e1;
 }
 
 .changeOwnerBtn {
@@ -311,8 +311,8 @@
 
 /* Right Panel Styles */
 .rightPanel {
-  background: rgba(30, 41, 59, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
   border-radius: 1.25rem;
   padding: 2.5rem;
   min-height: 480px;
@@ -433,7 +433,7 @@
 }
 
 .loading, .noSlots {
-  color: #64748b;
+  color: #94a3b8;
 }
 
 .slotsRow {
@@ -467,8 +467,8 @@
 
 /* Contact form view */
 .contactFormCard {
-  background: rgba(30, 41, 59, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
   border-radius: 1.5rem;
   padding: 2.5rem;
   max-width: 550px;
@@ -515,8 +515,8 @@
 
 /* Success View */
 .successCard {
-  background: rgba(30, 41, 59, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
   border-radius: 1.5rem;
   padding: 3rem;
   max-width: 550px;
@@ -565,7 +565,7 @@
 }
 
 .successDetails strong {
-  color: #64748b;
+  color: #94a3b8;
   margin-right: 0.5rem;
 }
 
@@ -612,6 +612,6 @@
 
 .footerSubmitBtn:disabled {
   background: #1e293b;
-  color: #475569;
+  color: #94a3b8;
   cursor: not-allowed;
 }
