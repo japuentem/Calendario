@@ -6,23 +6,57 @@ Esta guía detalla los pasos para instalar, configurar y ejecutar el **Sistema d
 
 ## ⚡ Instalación Automatizada con Scripts (Recomendado)
 
-Si prefieres realizar la instalación automatizada en 2 simples pasos:
+Sigue estos 2 simples pasos para la instalación automatizada en un servidor recién instalado:
 
-### 1️⃣ Paso 1 (Como `root` o con `sudo`):
-Descarga o ejecuta el script de preparación de servidor que instala Node.js, PM2, crea el usuario sin privilegios `calendario` y prepara el directorio `/var/www/calendario`:
+### 1️⃣ Paso 1: Configuración Inicial del Servidor (Como `root` o con `sudo`)
+Instala dependencias del sistema, Node.js 20, PM2, PostgreSQL, habilita la variable no interactiva para omitir pantallas de confirmación del kernel/servicios, crea la base de datos `calendario_db` y prepara la carpeta `/var/www/calendario`:
 
 ```bash
+# Descargar o ejecutar el script de setup como root/sudo
 bash scripts/setup_server.sh
 ```
+> *Nota: El script configura `DEBIAN_FRONTEND=noninteractive` y `NEEDRESTART_MODE=a` para prevenir bloqueos en pantalla durante las actualizaciones de paquetes.*
 
-### 2️⃣ Paso 2 (Como usuario `calendario`):
-Cámbiate al usuario `calendario` e inicia el despliegue automático:
+### 2️⃣ Paso 2: Clonación y Despliegue de la App (Como usuario `calendario`)
+Cámbiate al usuario `calendario`, ingresa a `/var/www/calendario` e inicia el clonado y despliegue automatizado:
 
 ```bash
+# 1. Cambiar al usuario de sistema sin privilegios
 sudo su - calendario
+
+# 2. Navegar al directorio de la aplicación
 cd /var/www/calendario
-bash scripts/deploy.sh https://github.com/tu-usuario/calendario.git
+
+# 3. Clonar el repositorio fuente (Si es privado, usa tu URL con Token PAT)
+# Ejemplo público: git clone https://github.com/japuentem/Calendario.git .
+# Ejemplo privado: git clone https://<TU_TOKEN_PAT>@github.com/japuentem/Calendario.git .
+git clone https://github.com/japuentem/Calendario.git .
+
+# 4. Ejecutar el script de despliegue automático
+bash scripts/deploy.sh
 ```
+
+---
+
+### 💡 Solución de Problemas Comunes en la Instalación
+
+1. **Si `git clone` falla por carpeta no vacía (`destination path '.' already exists`):**
+   ```bash
+   rm -rf /var/www/calendario/* /var/www/calendario/.* 2>/dev/null || true
+   git clone https://github.com/japuentem/Calendario.git .
+   ```
+
+2. **Si Prisma indica que PostgreSQL no responde (`Can't reach database server at localhost:5432`):**
+   ```bash
+   sudo systemctl restart postgresql
+   bash scripts/deploy.sh
+   ```
+
+3. **Si `apt` se traba al instalar o pide reparar paquetes:**
+   ```bash
+   sudo dpkg --configure -a
+   sudo apt install -f -y
+   ```
 
 ---
 
