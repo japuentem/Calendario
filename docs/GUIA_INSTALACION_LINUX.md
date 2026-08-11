@@ -46,9 +46,10 @@ bash scripts/deploy.sh
    git clone https://github.com/japuentem/Calendario.git .
    ```
 
-2. **Si Prisma indica que PostgreSQL no responde (`Can't reach database server at localhost:5432`):**
+2. **Si Prisma indica que PostgreSQL no responde en 5432 o se ejecuta en el puerto 5433:**
+   Verifica el puerto activo con `sudo ss -tlpn | grep postgres` y ajusta `.env` a `127.0.0.1:5433`:
    ```bash
-   sudo systemctl restart postgresql
+   sed -i 's/:5432/:5433/g' /var/www/calendario/.env
    bash scripts/deploy.sh
    ```
 
