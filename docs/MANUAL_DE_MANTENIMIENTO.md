@@ -119,19 +119,6 @@ SELECT * FROM "Evento";       # Consultar eventos agendados
 
 ---
 
-### 🔹 Opción C: Visor Web GUI de Prisma (Prisma Studio)
-Puedes levantar una interfaz gráfica de consulta temporal accesible localmente:
-
-```bash
-# Como usuario 'calendario' en /var/www/calendario
-sudo su - calendario
-cd /var/www/calendario
-npx prisma studio --port 5555 --browser none
-```
-> *Nota: Prisma Studio escucha por defecto en el puerto local 5555. Para acceder visualmente desde tu equipo personal se recomienda usar la **Opción A (pgAdmin con túnel SSH)** o redirigir el puerto 5555 vía SSH:* `ssh -L 5555:localhost:5555 root@74.208.163.44` *y abrir en tu navegador local `http://localhost:5555`.*
-
----
-
 ## 🚀 4. Procedimiento para Aplicar Actualizaciones (Despliegues Futuros)
 
 Cuando existan cambios en el código o en la estructura de la base de datos en el repositorio de GitHub:
