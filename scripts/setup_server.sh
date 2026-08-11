@@ -4,16 +4,37 @@
 # ==============================================================================
 set -e
 
-echo "🚀 [1/3] Actualizando repositorios e instalando paquetes básicos y PostgreSQL..."
+echo "🚀 [1/3] Actualizando repositorios e instalando paquetes básicos, PostgreSQL y Nginx..."
 export DEBIAN_FRONTEND=noninteractive
 export NEEDRESTART_MODE=a
 sudo -E apt update && sudo -E apt upgrade -y -o Dpkg::Options::="--force-confold" -o Dpkg::Options::="--force-confdef"
-sudo -E apt install -y git curl build-essential postgresql postgresql-contrib
+sudo -E apt install -y git curl build-essential postgresql postgresql-contrib nginx
 
 echo "📦 [2/3] Instalando Node.js 20 LTS y PM2 globalmente..."
 curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 sudo apt install -y nodejs
 sudo npm install -g pm2
+
+# Configurar Nginx como Proxy Inverso al puerto 3000
+sudo tee /etc/nginx/sites-available/calendario << 'EOF'
+server {
+    listen 80;
+    server_name _;
+
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+EOF
+sudo ln -sf /etc/nginx/sites-available/calendario /etc/nginx/sites-enabled/
+sudo rm -f /etc/nginx/sites-enabled/default
+sudo systemctl enable nginx
+sudo systemctl restart nginx
 
 # Asegurar que el servicio de PostgreSQL esté iniciado y crear usuario/BD por defecto
 sudo systemctl enable postgresql
