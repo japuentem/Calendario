@@ -4,6 +4,12 @@ Esta guía detalla los pasos para instalar, configurar y ejecutar el **Sistema d
 
 ---
 
+> 📘 **DOCUMENTACIÓN COMPLEMENTARIA:**
+> * Para ver los procedimientos operativos, reinicio de servicios (PM2, Nginx, PostgreSQL), respaldos y consultas a la base de datos con pgAdmin/psql, consulta el **[Manual de Mantenimiento y Operación](file:///d:/proyectos_personales/html/Calendario/docs/MANUAL_DE_MANTENIMIENTO.md)**.
+> * Para ver las características funcionales y uso de los tres roles, consulta el **[Manual de Uso](file:///d:/proyectos_personales/html/Calendario/docs/MANUAL_DE_USO.md)**.
+
+---
+
 ## ⚡ Instalación Automatizada con Scripts (Recomendado)
 
 Sigue estos 2 simples pasos para la instalación automatizada en un servidor recién instalado:
