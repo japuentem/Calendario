@@ -17,7 +17,7 @@ interface Dueno {
     mensajeCierre?: string;
     imagenPresentacion?: string;
     limitesAgendar: number;
-    tiposEventos: { id: string; nombre: string; duracion: number; margenSeguridad: number }[];
+    tiposEventos: { id: string; nombre: string; nombrePersonalizado?: string | null; activo?: boolean; duracion: number; margenSeguridad: number }[];
     disponibilidades: { id: string; diaSemana: number; horaInicio: string; horaFin: string }[];
     fechasEspeciales: { id: string; fecha: string; horaInicio: string; horaFin: string }[];
   };
@@ -48,8 +48,8 @@ export default function BookAppointment() {
 
   // Form states
   const [contacto, setContacto] = useState({ nombre: '', apellido: '', correo: '', telefono: '' });
-  const [invitados, setInvitados] = useState<string[]>([]);
-  const [newInvitadoCorreo, setNewInvitadoCorreo] = useState('');
+  const [invitados, setInvitados] = useState<{ nombre: string; apellido: string; correo: string }[]>([]);
+  const [newInvitado, setNewInvitado] = useState({ nombre: '', apellido: '', correo: '' });
 
   // Flow control: 'pantalla1_select_day' | 'pantalla2_select_slot' | 'pantalla3_contact_data' | 'pantalla4_success'
   const [flowMode, setFlowMode] = useState<'pantalla1_select_day' | 'pantalla2_select_slot' | 'pantalla3_contact_data' | 'pantalla4_success'>('pantalla1_select_day');
@@ -73,16 +73,12 @@ export default function BookAppointment() {
   const activeCalendar = activeOwner?.calendario;
   const activeEventType = activeCalendar?.tiposEventos?.find(t => t.id === selectedEventTypeId);
 
-  // Set default event type to CITA_REUNION or CITA / REUNION if available
+  // Set default event type to first active event type
   useEffect(() => {
     if (activeCalendar && !selectedEventTypeId) {
-      const defaultType = activeCalendar.tiposEventos.find(
-        t => t.nombre === 'CITA_REUNION' || t.nombre === 'CITA / REUNION' || t.nombre.includes('CITA')
-      );
-      if (defaultType) {
-        setSelectedEventTypeId(defaultType.id);
-      } else if (activeCalendar.tiposEventos.length > 0) {
-        setSelectedEventTypeId(activeCalendar.tiposEventos[0].id);
+      const activeTypes = activeCalendar.tiposEventos?.filter(t => t.activo !== false) || [];
+      if (activeTypes.length > 0) {
+        setSelectedEventTypeId(activeTypes[0].id);
       }
     }
   }, [activeCalendar, selectedEventTypeId]);
@@ -355,8 +351,10 @@ export default function BookAppointment() {
                     <label>EVENTO SOLICITADO</label>
                     <select value={selectedEventTypeId} onChange={(e) => setSelectedEventTypeId(e.target.value)}>
                       <option value="">-- Selecciona tipo --</option>
-                      {activeCalendar?.tiposEventos.map(t => (
-                        <option key={t.id} value={t.id}>{t.nombre.replace('_', ' ')} ({t.duracion} min)</option>
+                      {activeCalendar?.tiposEventos?.filter(t => t.activo !== false).map(t => (
+                        <option key={t.id} value={t.id}>
+                          {t.nombrePersonalizado ? t.nombrePersonalizado : t.nombre.replace('_', ' ')} ({t.duracion} min)
+                        </option>
                       ))}
                     </select>
                   </div>
@@ -523,24 +521,45 @@ export default function BookAppointment() {
                 />
               </div>
 
-              {/* RG-003: Allow adding guests only if type is VIDEOCONFERENCIA or CITA_REUNION */}
-              {(activeEventType?.nombre === 'VIDEOCONFERENCIA' || activeEventType?.nombre === 'CITA_REUNION' || activeEventType?.nombre === 'CITA / REUNION') && (
-                <div className={styles.formGroup}>
-                  <label>PUEDE AGREGAR INVITADOS A ESTE EVENTO</label>
-                  <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.25rem' }}>
+              {/* RG-003: Allow adding guests if enabled by owner and type supports multiple participants */}
+              {activeCalendar?.permitirInvitados && (activeEventType?.nombre === 'VIDEOCONFERENCIA' || activeEventType?.nombre === 'CITA_REUNION' || activeEventType?.nombre === 'CITA / REUNION' || activeEventType?.nombrePersonalizado) && (
+                <div className={styles.formGroup} style={{ border: '1px solid rgba(255,255,255,0.1)', padding: '1rem', borderRadius: '0.5rem', background: 'rgba(255,255,255,0.02)' }}>
+                  <label style={{ fontWeight: 'bold', color: '#e2e8f0', marginBottom: '0.5rem', display: 'block' }}>AGREGAR OTROS INVITADOS AL EVENTO</label>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1.2fr auto', gap: '0.5rem', alignItems: 'center' }}>
+                    <input 
+                      type="text" 
+                      placeholder="Nombre *"
+                      value={newInvitado.nombre}
+                      onChange={(e) => setNewInvitado({ ...newInvitado, nombre: e.target.value })}
+                    />
+                    <input 
+                      type="text" 
+                      placeholder="Apellido *"
+                      value={newInvitado.apellido}
+                      onChange={(e) => setNewInvitado({ ...newInvitado, apellido: e.target.value })}
+                    />
                     <input 
                       type="email" 
-                      placeholder="ejemplo@correo.com"
-                      value={newInvitadoCorreo}
-                      onChange={(e) => setNewInvitadoCorreo(e.target.value)}
-                      style={{ flex: 1 }}
+                      placeholder="Correo electrónico *"
+                      value={newInvitado.correo}
+                      onChange={(e) => setNewInvitado({ ...newInvitado, correo: e.target.value })}
                     />
                     <button 
                       type="button" 
                       onClick={() => {
-                        if (newInvitadoCorreo && !invitados.includes(newInvitadoCorreo)) {
-                          setInvitados([...invitados, newInvitadoCorreo]);
-                          setNewInvitadoCorreo('');
+                        if (newInvitado.nombre.trim() && newInvitado.apellido.trim() && newInvitado.correo.trim()) {
+                          if (!invitados.some(i => i.correo.toLowerCase() === newInvitado.correo.trim().toLowerCase())) {
+                            setInvitados([...invitados, { 
+                              nombre: newInvitado.nombre.trim(), 
+                              apellido: newInvitado.apellido.trim(), 
+                              correo: newInvitado.correo.trim() 
+                            }]);
+                            setNewInvitado({ nombre: '', apellido: '', correo: '' });
+                          } else {
+                            alert("Este correo ya ha sido agregado como invitado");
+                          }
+                        } else {
+                          alert("Para agregar un invitado debes completar Nombre, Apellido y Correo Electrónico");
                         }
                       }}
                       style={{
@@ -548,23 +567,24 @@ export default function BookAppointment() {
                         color: 'white',
                         border: 'none',
                         borderRadius: '0.5rem',
-                        padding: '0 1rem',
+                        padding: '0.5rem 1rem',
                         cursor: 'pointer',
-                        fontWeight: 'bold'
+                        fontWeight: 'bold',
+                        whiteSpace: 'nowrap'
                       }}
                     >
-                      +
+                      + Agregar
                     </button>
                   </div>
                   {invitados.length > 0 && (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', marginTop: '0.5rem' }}>
-                      {invitados.map(correo => (
-                        <div key={correo} style={{ display: 'flex', justifyContent: 'space-between', background: 'rgba(255,255,255,0.05)', padding: '0.4rem 0.75rem', borderRadius: '0.25rem' }}>
-                          <span>{correo}</span>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', marginTop: '0.75rem' }}>
+                      {invitados.map(inv => (
+                        <div key={inv.correo} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.06)', padding: '0.5rem 0.75rem', borderRadius: '0.375rem' }}>
+                          <span>👤 <strong>{inv.nombre} {inv.apellido}</strong> ({inv.correo})</span>
                           <button 
                             type="button" 
-                            onClick={() => setInvitados(invitados.filter(i => i !== correo))}
-                            style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}
+                            onClick={() => setInvitados(invitados.filter(i => i.correo !== inv.correo))}
+                            style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '1rem' }}
                           >
                             ✕
                           </button>

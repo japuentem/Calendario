@@ -62,14 +62,16 @@ model Calendario {
 }
 
 model TipoEvento {
-  id               String     @id @default(uuid())
-  nombre           String     // "REALIZAR_LLAMADA" | "RECIBIR_LLAMADA" | "CITA_REUNION" | "VIDEOCONFERENCIA"
-  duracion         Int        // en minutos, ej: 15, 30, 45, 60, 75, 90
-  margenSeguridad  Int        // en minutos, ej: 15, 30, 45
-  calendarioId     String
-  calendario       Calendario @relation(fields: [calendarioId], references: [id], onDelete: Cascade)
-  createdAt        DateTime   @default(now())
-  updatedAt        DateTime   @updatedAt
+  id                  String     @id @default(uuid())
+  nombre              String     // "REALIZAR_LLAMADA" | "RECIBIR_LLAMADA" | "CITA_REUNION" | "VIDEOCONFERENCIA"
+  nombrePersonalizado String?    // Nombre personalizado configurable por el dueño (ej: "Atención a Domicilio")
+  activo              Boolean    @default(true) // Indica si el evento está disponible para selección de terceros
+  duracion            Int        // en minutos, ej: 15, 30, 45, 60, 75, 90
+  margenSeguridad     Int        // en minutos, ej: 15, 30, 45
+  calendarioId        String
+  calendario          Calendario @relation(fields: [calendarioId], references: [id], onDelete: Cascade)
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
 }
 
 model Disponibilidad {

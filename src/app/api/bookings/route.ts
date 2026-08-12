@@ -54,15 +54,25 @@ export async function POST(request: Request) {
         },
       });
 
-      // Invitados adicionales
+      // Invitados adicionales (guardar nombre, apellido y correo)
       if (data.invitados && Array.isArray(data.invitados)) {
-        for (const correo of data.invitados) {
-          if (correo && correo.trim() !== '') {
+        for (const item of data.invitados) {
+          if (typeof item === 'object' && item !== null && item.correo) {
+            await tx.participante.create({
+              data: {
+                nombre: item.nombre?.trim() || 'Invitado',
+                apellido: item.apellido?.trim() || '',
+                correo: item.correo.trim(),
+                esCreador: false,
+                eventoId: newEvent.id,
+              },
+            });
+          } else if (typeof item === 'string' && item.trim() !== '') {
             await tx.participante.create({
               data: {
                 nombre: 'Invitado',
                 apellido: '',
-                correo: correo.trim(),
+                correo: item.trim(),
                 esCreador: false,
                 eventoId: newEvent.id,
               },

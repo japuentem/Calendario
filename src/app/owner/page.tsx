@@ -28,6 +28,8 @@ interface Evento {
 interface TipoEvento {
   id: string;
   nombre: string;
+  nombrePersonalizado?: string | null;
+  activo?: boolean;
   duracion: number;
   margenSeguridad: number;
 }
@@ -722,56 +724,87 @@ export default function OwnerDashboard() {
               <div className={styles.eventTypesGrid}>
                 {['CITA_REUNION', 'VIDEOCONFERENCIA', 'RECIBIR_LLAMADA', 'REALIZAR_LLAMADA'].map(name => {
                   const currentType = tiposEventos.find(t => t.nombre === name);
-                  const isEnabled = !!currentType;
+                  const isEnabled = currentType ? (currentType.activo !== false) : false;
 
                   return (
                     <div key={name} className={`${styles.eventTypeRow} ${isEnabled ? styles.eventTypeRowActive : ''}`}>
-                      <div className={styles.eventTypeHeader}>
-                        <input 
-                          type="checkbox"
-                          id={`evt-${name}`}
-                          checked={isEnabled}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setTiposEventos([...tiposEventos, {
-                                id: Math.random().toString(),
-                                nombre: name,
-                                duracion: name.includes('LLAMADA') ? 15 : 30,
-                                margenSeguridad: 15
-                              }]);
-                            } else {
-                              setTiposEventos(tiposEventos.filter(t => t.nombre !== name));
-                            }
-                          }}
-                        />
-                        <label htmlFor={`evt-${name}`}><strong>{name.replace('_', ' ')}</strong></label>
+                      <div className={styles.eventTypeHeader} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                          <input 
+                            type="checkbox"
+                            id={`evt-${name}`}
+                            checked={isEnabled}
+                            onChange={(e) => {
+                              const checked = e.target.checked;
+                              if (currentType) {
+                                setTiposEventos(tiposEventos.map(t => 
+                                  t.nombre === name ? { ...t, activo: checked } : t
+                                ));
+                              } else if (checked) {
+                                setTiposEventos([...tiposEventos, {
+                                  id: Math.random().toString(),
+                                  nombre: name,
+                                  nombrePersonalizado: '',
+                                  activo: true,
+                                  duracion: name.includes('LLAMADA') ? 15 : 30,
+                                  margenSeguridad: 15
+                                }]);
+                              }
+                            }}
+                          />
+                          <label htmlFor={`evt-${name}`}><strong>{name.replace('_', ' ')}</strong></label>
+                        </div>
+                        {isEnabled && (
+                          <span style={{ fontSize: '0.75rem', background: 'rgba(16, 185, 129, 0.2)', color: '#34d399', padding: '0.15rem 0.5rem', borderRadius: '0.25rem', fontWeight: 'bold' }}>
+                            DISPONIBLE
+                          </span>
+                        )}
                       </div>
 
                       {isEnabled && currentType && (
-                        <div className={styles.eventTypeInputs}>
+                        <div className={styles.eventTypeInputs} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '0.5rem' }}>
                           <div className={styles.formGroup}>
-                            <label>Duración (min)</label>
+                            <label style={{ fontSize: '0.8rem', color: '#cbd5e1' }}>Nombre personalizado para el calendario (Ej: Atención a Domicilio)</label>
                             <input 
-                              type="number" min={5} step={5}
-                              value={currentType.duracion}
+                              type="text" 
+                              placeholder={`Ej: ${name.replace('_', ' ')}`}
+                              value={currentType.nombrePersonalizado || ''}
                               onChange={(e) => {
                                 setTiposEventos(tiposEventos.map(t => 
-                                  t.nombre === name ? { ...t, duracion: parseInt(e.target.value) } : t
+                                  t.nombre === name ? { ...t, nombrePersonalizado: e.target.value } : t
                                 ));
                               }}
+                              style={{ background: 'rgba(15,23,42,0.6)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', borderRadius: '0.5rem', padding: '0.5rem' }}
                             />
                           </div>
-                          <div className={styles.formGroup}>
-                            <label>Margen (min)</label>
-                            <input 
-                              type="number" min={0} step={5}
-                              value={currentType.margenSeguridad}
-                              onChange={(e) => {
-                                setTiposEventos(tiposEventos.map(t => 
-                                  t.nombre === name ? { ...t, margenSeguridad: parseInt(e.target.value) } : t
-                                ));
-                              }}
-                            />
+
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                            <div className={styles.formGroup}>
+                              <label style={{ fontSize: '0.8rem', color: '#cbd5e1' }}>Duración (min)</label>
+                              <input 
+                                type="number" min={5} step={5}
+                                value={currentType.duracion}
+                                onChange={(e) => {
+                                  setTiposEventos(tiposEventos.map(t => 
+                                    t.nombre === name ? { ...t, duracion: parseInt(e.target.value) || 15 } : t
+                                  ));
+                                }}
+                                style={{ background: 'rgba(15,23,42,0.6)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', borderRadius: '0.5rem', padding: '0.5rem' }}
+                              />
+                            </div>
+                            <div className={styles.formGroup}>
+                              <label style={{ fontSize: '0.8rem', color: '#cbd5e1' }}>Margen (min)</label>
+                              <input 
+                                type="number" min={0} step={5}
+                                value={currentType.margenSeguridad}
+                                onChange={(e) => {
+                                  setTiposEventos(tiposEventos.map(t => 
+                                    t.nombre === name ? { ...t, margenSeguridad: parseInt(e.target.value) || 0 } : t
+                                  ));
+                                }}
+                                style={{ background: 'rgba(15,23,42,0.6)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', borderRadius: '0.5rem', padding: '0.5rem' }}
+                              />
+                            </div>
                           </div>
                         </div>
                       )}

@@ -35,23 +35,21 @@ else
 fi
 
 echo "📦 [2/6] Instalando dependencias Node.js..."
-npm ci || npm install
+npm install
 
 echo "⚙️ [3/6] Verificando archivo de entorno (.env)..."
 if [ ! -f ".env" ]; then
-  if [ -f ".env.example" ]; then
-    cp .env.example .env
-    echo "⚠️ Se creó el archivo .env desde .env.example."
-    echo "   Recuerda configurar DATABASE_URL en /var/www/calendario/.env"
-  else
-    echo 'DATABASE_URL="postgresql://postgres:postgres@localhost:5432/calendario_db?schema=public"' > .env
-    echo "⚠️ Se creó un archivo .env base."
-  fi
+  echo 'DATABASE_URL="postgresql://postgres:postgres@127.0.0.1:5433/calendario_db?schema=public"' > .env
+  echo "⚠️ Se creó el archivo .env base."
 fi
 
 echo "🗄️ [4/6] Configurando Prisma ORM y Base de Datos..."
 npx prisma generate
-npx prisma db push
+npx prisma db push || {
+  echo "🔄 Intentando iniciar servicio de PostgreSQL..."
+  sudo systemctl start postgresql 2>/dev/null || true
+  npx prisma db push
+}
 
 # Poblar datos base/demo si existe el script de seed
 if [ -f "prisma/seed.ts" ]; then

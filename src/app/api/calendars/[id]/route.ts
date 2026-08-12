@@ -31,6 +31,8 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
           await tx.tipoEvento.create({
             data: {
               nombre: t.nombre,
+              nombrePersonalizado: t.nombrePersonalizado || null,
+              activo: t.activo !== undefined ? Boolean(t.activo) : true,
               duracion: parseInt(t.duracion),
               margenSeguridad: parseInt(t.margenSeguridad),
               calendarioId: id,
